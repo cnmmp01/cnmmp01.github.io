@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test Demo</title>
+</head>
+
+<body>
+    <div id="infor">
+
+        <h2 id="time">time</h2>
+        <h2 id="trackingtime">trackingtime</h2>
+        <h2 id="isview">isview</h2>
+        <h2 id="timeonsite">timeonsite</h2>
+
+    </div>
+
+    <div id="target">
+
+    </div>
+
+    <style>
+        #infor {
+            top: 1%;
+            position: fixed;
+        }
+        
+        #target {
+            position: absolute;
+            top: 150%;
+            width: 200px;
+            height: 200px;
+            background: red;
+        }
+    </style>
+
+    <script src="../dist/smartview.js?reqw=400&reqh=280&impid=target&method=2"></script>
+    <script>
+        new SmartView().starttrack();
+    </script>
+</body>
+
+</html>
