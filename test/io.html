@@ -6,13 +6,8 @@
 </head>
 
 <body>
-    <div id="infor">
-
-        <h2 id="time">time</h2>
-        <h2 id="trackingtime">trackingtime</h2>
-        <h2 id="isview">isview</h2>
-        <h2 id="timeonsite">timeonsite</h2>
-
+    <div>
+        isAdView: <span id="isview"></span>
     </div>
 
     <div id="target">
@@ -20,23 +15,21 @@
     </div>
 
     <style>
-        #infor {
-            top: 1%;
-            position: fixed;
-        }
-        
         #target {
             position: absolute;
-            top: 150%;
-            width: 200px;
-            height: 200px;
+            top: 10%;
+            width: 400px;
+            height: 280px;
             background: red;
         }
     </style>
 
-    <script src="../dist/smartview.js?reqw=400&reqh=280&impid=target&method=2"></script>
+    <script src="../dist/smartview.js?reqw=400&reqh=280&impid=target&ep=smart.com"></script>
     <script>
-        new SmartView().starttrack();
+        var el = document.getElementById('isview');
+        setInterval(function() {
+            el.innerText = window.isAdView
+        }, 1000)
     </script>
 </body>
 
