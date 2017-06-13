@@ -2,15 +2,31 @@
 <html>
 
 <head>
-    <title>Test Demo</title>
+    <title>xframe Demo</title>
 </head>
 
 <body>
-    <iframe src="http://a.com:8080/test/adv.html" style="width:320px; height:100px;" scrolling="no" frameborder="no" border="0" marginwidth="0" marginheight="0">
+    <div>
+        isAdView: <span id="isview"></span>
+    </div>
+    <iframe src="http://a.com:8080/test/ad1.html" style="width:320px; height:100px;" scrolling="no" frameborder="no" border="0" marginwidth="0" marginheight="0">
     </iframe>
     <div style="width:3000px; height:1000px;">
     </div>
+    <script>
+        window.onload = function() {
+            var el = document.getElementById('isview');
+            var frame = window.frames[0];
+            setInterval(function() {
+                if (typeof frame.isAdView !== 'undefined') {
+                    el.innerText = frame.isAdView
+                } else {
+                    el.innerText = "false";
+                }
 
+            }, 1000)
+        }
+    </script>
 </body>
 
 </html>

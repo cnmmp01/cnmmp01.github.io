@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Intersection Observer Test</title>
+
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+</head>
+
+<body>
+
+    <iframe src="ad2.html" style="width:320px; height:100px;" scrolling="no" frameborder="no" border="0" marginwidth="0" marginheight="0">
+    </iframe>
+    <div>
+        isAdView: <span id="isview"></span>
+    </div>
+    <div>
+        clicked: <span id="clicked"></span>
+    </div>
+    <div>
+        last isActive: <span id="lastActive"></span>
+    </div>
+    <div>
+        isActive: <span id="active"></span>
+    </div>
+    <div style="width:3000px; height:1000px;">
+    </div>
+    <script>
+        window.onload = function() {
+            var elv = document.getElementById('isview');
+            var elc = document.getElementById('clicked');
+            var ela = document.getElementById('active');
+            var ella = document.getElementById('lastActive');
+            var frame = window.frames[0];
+            var lastState = '';
+            setInterval(function() {
+                if (typeof frame.isAdView !== 'undefined') {
+                    elv.innerText = frame.isAdView
+                } else {
+                    elv.innerText = "false";
+                }
+                if (typeof frame.clicked !== 'undefined') {
+                    elc.innerText = frame.clicked
+                } else {
+                    elc.innerText = "false";
+                }
+                if (typeof frame.isActive !== 'undefined') {
+                    var state = frame.isActive ? 'active' : 'not active';
+                    if (state != lastState) {
+                        ella.innerText = lastState;
+                        ela.innerText = state;
+                        lastState = state;
+                    }
+
+                } else {
+                    ela.innerText = "false";
+                }
+
+            }, 1000)
+        }
+    </script>
+</body>
+
+</html>

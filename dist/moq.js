@@ -63,14 +63,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 	Object.defineProperty(exports, "__esModule", { value: true });
-	var ViewAbility_1 = __webpack_require__(2);
+	var SmartView_1 = __webpack_require__(2);
 	var Params_1 = __webpack_require__(9);
 	var IframeClickTracker_1 = __webpack_require__(10);
 	var AdInformation_1 = __webpack_require__(11);
 	var Http_1 = __webpack_require__(13);
 	var RequestObj_1 = __webpack_require__(15);
-	var SmartView = (function () {
-	    function SmartView() {
+	var Moq = (function () {
+	    function Moq() {
 	        var _this = this;
 	        this.trackStart = false;
 	        this.viewDuration = 0;
@@ -80,8 +80,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.activeIntersection = false;
 	        this.intersectionView = false;
 	        this.testMethod = 0;
+	        this.clicked = 0;
 	        this.getAdElement = function () {
-	            if (typeof _this.ad === 'undefined' || _this.ad === null) {
+	            //console.log('getAdElement');
+	            if (!_this.ad) {
 	                _this.searchNodes(_this.myScript.parentNode);
 	            }
 	        };
@@ -92,20 +94,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    var sonnodes = node.childNodes;
 	                    for (var i = 0; i < sonnodes.length; i++) {
 	                        var sonnode = sonnodes.item(i);
-	                        if (_this.btw5(sonnode.scrollWidth, _this.params.reqw) && _this.btw5(sonnode.scrollHeight, _this.params.reqh)) {
-	                            _this.ad = sonnode;
-	                            clearInterval(_this.adTrackInterval);
-	                            if (_this.ad.tagName === 'IFRAME') {
-	                                new IframeClickTracker_1.IframeClickTracker().track(_this.ad, function () { self.updateTrackObj(ApiAction.clicked); });
+	                        if (sonnode.nodeName !== 'SCRIPT') {
+	                            if (sonnode.scrollWidth && sonnode.scrollHeight) {
+	                                if (_this.btw5(sonnode.scrollWidth, _this.params.reqw) && _this.btw5(sonnode.scrollHeight, _this.params.reqh)) {
+	                                    _this.ad = sonnode;
+	                                    if (_this.ad.tagName === 'IFRAME') {
+	                                        new IframeClickTracker_1.IframeClickTracker().track(_this.ad, function () {
+	                                            window.clicked = self.clicked += 1;
+	                                            self.updateTrackObj(ApiAction.clicked);
+	                                        });
+	                                    }
+	                                    else {
+	                                        _this.ad.addEventListener('click', function () {
+	                                            window.clicked = self.clicked += 1;
+	                                            self.updateTrackObj(ApiAction.clicked);
+	                                        });
+	                                    }
+	                                    _this.ad.style.msTouchAction = 'manipulation';
+	                                    _this.ad.style.touchAction = 'manipulation';
+	                                    // alert(this.ad);
+	                                    break;
+	                                }
 	                            }
-	                            else {
-	                                _this.ad.addEventListener('click', function () { self.updateTrackObj(ApiAction.clicked); });
-	                            }
-	                            _this.ad.style.msTouchAction = 'manipulation';
-	                            _this.ad.style.touchAction = 'manipulation';
-	                            return;
+	                            _this.searchNodes(sonnode);
 	                        }
-	                        _this.searchNodes(sonnode);
 	                    }
 	                }
 	            }
@@ -124,6 +136,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _this.isHidden = evtMap[evt.type] == h;
 	            else
 	                _this.isHidden = document.hidden;
+	            //console.log('is hidden :' + this.isHidden);
 	        };
 	        this.parseQuery = function (query) {
 	            var Params = {};
@@ -163,17 +176,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _this.trackStart = true;
 	                _this.updateTrackObj(ApiAction.init);
 	            }
-	            _this.getAdElement();
-	            if (typeof _this.ad !== 'undefined') {
-	                if (typeof _this.viewAbility === 'undefined') {
-	                    _this.viewAbility = new ViewAbility_1.ViewAbility(_this.ad).getMethod();
-	                }
+	            // if (typeof this.ad === 'undefined' || this.ad === null) {
+	            if (!_this.ad) {
+	                _this.getAdElement();
 	            }
-	            else {
+	            if (!_this.ad) {
+	                // alert('no ad')
+	                return;
+	            }
+	            // if (typeof this.viewAbility === 'undefined') {
+	            if (!_this.viewAbility) {
+	                var m = _this.testMethod;
+	                var viewAbility = new SmartView_1.SmartView(_this.ad);
+	                _this.viewAbility = viewAbility.getMethod(m);
+	                _this.methodName = viewAbility.methodName;
+	                //console.log(this.methodName);
+	            }
+	            if (!_this.viewAbility) {
+	                // alert('no method')
 	                return;
 	            }
 	            isView = typeof _this.viewAbility === 'undefined' ? false : (_this.viewAbility.isView() && !_this.isHidden);
 	            window.isAdView = isView;
+	            window.isActive = !_this.isHidden;
+	            // alert('view:'+window.isAdView+'  Active:'+window.isActive)
+	            //console.log('isAdView:' + window.isAdView + 'isActive:' + window.isActive)
 	            //update tos and view duration
 	            if (_this.adInformation.timeOnSite < 120 * 1000) {
 	                // if in view add tos and view time 
@@ -240,7 +267,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	        this.stopTracker = function () {
 	            clearInterval(_this.tracker);
-	            console.log(_this.adInformation);
 	        };
 	        this.test = function () {
 	            alert('work!');
@@ -253,12 +279,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                info.innerText = (parseInt(info.innerText) + 1).toString();
 	            });
 	        };
-	        var d = new Date();
-	        if (typeof mraid !== 'undefined') {
-	            console.log('have mriad');
-	        }
-	        var options = { timeZone: 'UTC', timeZoneName: 'short' };
-	        var t = d.toLocaleTimeString('en-US', options);
 	        if (this.hidden in document)
 	            document.addEventListener('visibilitychange', this.onchange);
 	        else if ((this.hidden = 'mozHidden') in document)
@@ -275,7 +295,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (document.hidden !== undefined)
 	            this.onchange({ type: document.hidden ? 'blur' : 'focus' });
 	        var scripts = document.getElementsByTagName('script');
-	        var re = /smartview.js/gi;
+	        var re = /moq.js/gi;
 	        for (var i = 0; i < scripts.length; i++) {
 	            if (scripts[i].outerHTML.search(re) != -1) {
 	                this.myScript = scripts[i];
@@ -291,20 +311,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	            args.reqh = parseInt(this.srcParm['reqh'].prop);
 	            args.reqw = parseInt(this.srcParm['reqw'].prop);
 	            this.params = args;
+	            this.testMethod = parseInt(this.srcParm['test'].prop);
 	        }
 	        catch (error) {
 	            console.log(error);
 	        }
 	        this.adInformation = new AdInformation_1.AdInformation();
 	        this.getAdElement();
-	        console.log(this.ad);
 	    }
-	    return SmartView;
+	    return Moq;
 	}());
-	exports.SmartView = SmartView;
-	window.onload = function () {
-	    var moq = new SmartView().startTracking();
-	};
+	exports.Moq = Moq;
+	new Moq().startTracking();
 	var ApiAction = (function () {
 	    function ApiAction() {
 	    }
@@ -327,35 +345,64 @@ return /******/ (function(modules) { // webpackBootstrap
 	var RequestAnimationFrame_1 = __webpack_require__(6);
 	var IntersectionObserverAPI_1 = __webpack_require__(7);
 	var Geometry_1 = __webpack_require__(8);
-	var ViewAbility = (function () {
-	    function ViewAbility(el) {
+	var SmartView = (function () {
+	    function SmartView(el) {
 	        var _this = this;
-	        this.getMethod = function () {
-	            var geometry = new Geometry_1.Geometry(_this.ad);
-	            if (geometry.isSupported())
-	                return geometry;
-	            var intersectionObserverAPI = new IntersectionObserverAPI_1.IntersectionObserverAPI(_this.ad);
-	            if (intersectionObserverAPI.isSupported())
-	                return intersectionObserverAPI;
-	            var safeFrame = new SafeFrame_1.SafeFrame(_this.ad);
-	            if (safeFrame.isSupported())
-	                return safeFrame;
-	            var requestAnimationFrame = new RequestAnimationFrame_1.RequestAnimationFrame(_this.ad);
-	            if (requestAnimationFrame.isSupported())
-	                return requestAnimationFrame;
-	            var mraidAPI = new MraidAPI_1.MraidAPI();
-	            if (mraidAPI.isSupported())
-	                return mraidAPI;
+	        this.methodName = '';
+	        this.getMethod = function (m) {
+	            switch (m) {
+	                case 0:
+	                    var geometry = new Geometry_1.Geometry(_this.ad);
+	                    if (geometry.isSupported()) {
+	                        _this.methodName = 'geometry';
+	                        return geometry;
+	                    }
+	                    var intersectionObserverAPI = new IntersectionObserverAPI_1.IntersectionObserverAPI(_this.ad);
+	                    if (intersectionObserverAPI.isSupported()) {
+	                        _this.methodName = 'intersectionObserver';
+	                        return intersectionObserverAPI;
+	                    }
+	                    var safeFrame = new SafeFrame_1.SafeFrame(_this.ad);
+	                    if (safeFrame.isSupported()) {
+	                        _this.methodName = 'safeFrame';
+	                        return safeFrame;
+	                    }
+	                    var requestAnimationFrame = new RequestAnimationFrame_1.RequestAnimationFrame(_this.ad);
+	                    if (requestAnimationFrame.isSupported()) {
+	                        _this.methodName = 'requestAnimationFrame';
+	                        return requestAnimationFrame;
+	                    }
+	                    var mraidAPI = new MraidAPI_1.MraidAPI();
+	                    if (mraidAPI.isSupported()) {
+	                        _this.methodName = 'mraid';
+	                        return mraidAPI;
+	                    }
+	                    break;
+	                case 1:
+	                    _this.methodName = 'geometry';
+	                    return new Geometry_1.Geometry(_this.ad);
+	                case 2:
+	                    _this.methodName = 'intersectionObserver';
+	                    return new IntersectionObserverAPI_1.IntersectionObserverAPI(_this.ad);
+	                case 3:
+	                    _this.methodName = 'safeFrame';
+	                    return new SafeFrame_1.SafeFrame(_this.ad);
+	                case 4:
+	                    _this.methodName = 'requestAnimationFrame';
+	                    return new RequestAnimationFrame_1.RequestAnimationFrame(_this.ad);
+	                case 5:
+	                    _this.methodName = 'mraid';
+	                    return new MraidAPI_1.MraidAPI();
+	                default:
+	                    return null;
+	            }
 	            return null;
-	        };
-	        this.test = function () {
-	            alert('work!');
 	        };
 	        this.ad = el;
 	    }
-	    return ViewAbility;
+	    return SmartView;
 	}());
-	exports.ViewAbility = ViewAbility;
+	exports.SmartView = SmartView;
 
 
 /***/ }),
@@ -414,6 +461,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.isSupported = function (cb) {
 	            var status = true;
 	            if (typeof _this.extern === 'undefined') {
+	                status = false;
+	            }
+	            if (typeof _this.ad === 'undefined') {
 	                status = false;
 	            }
 	            if (typeof cb === 'function') {
@@ -542,7 +592,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _this.frame.style.left = x + 'px';
 	        };
 	        var frame = document.createElement('iframe');
-	        el.appendChild(frame);
+	        el.parentNode.appendChild(frame);
 	        frame.id = 'VisFrame1';
 	        frame.style.width = '4px';
 	        frame.style.height = '4px';
@@ -550,14 +600,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	        frame.style.verticalAlign = 'top';
 	        frame.scrolling = 'no';
 	        frame.frameBorder = '0';
+	        var top = el.offsetTop;
+	        var left = el.offsetLeft;
 	        var width = el.offsetWidth;
 	        var height = el.offsetHeight;
-	        frame.style.marginTop = Math.round(height / 2) + 'px';
-	        frame.style.marginLeft = Math.round(width / 2) + 'px';
+	        while (el.offsetParent) {
+	            el = el.offsetParent;
+	            top += el.offsetTop;
+	            left += el.offsetLeft;
+	        }
+	        frame.style.marginTop = '-' + Math.round((height + top) / 2) + 'px';
+	        frame.style.marginLeft = Math.round((width + left) / 2) + 'px';
 	        this.listen();
 	        this.frame = frame;
 	        frame.src = 'data:text/html;charset=UTF-8,' + '<html><head></head><body><script>window.parent.postMessage("yo","*"); function call(){window.parent.postMessage("hi","*"),window.requestAnimationFrame(call)}call();</script></body></html>';
-	        this.test();
+	        //this.test();
 	    }
 	    RequestAnimationFrame.prototype.isSupported = function (cb) {
 	        if (typeof requestAnimationFrame == 'undefined' || typeof this.ad == 'undefined' || this.ad == null || !this.passTest) {
@@ -747,7 +804,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var activeElement = document.activeElement;
 	                for (var i in _this.iframes) {
 	                    if (activeElement === _this.iframes[i].element) {
-	                        if (_this.iframes[i].hasTracked == false) {
+	                        if (_this.iframes[i].hasTracked === false) {
 	                            _this.iframes[i].cb.apply(window, []);
 	                            _this.iframes[i].hasTracked = true;
 	                        }
@@ -880,7 +937,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                };
 	            }
 	            if (config.dev_stage) {
-	                console.log(obj);
+	                //  console.log(obj);
 	                return;
 	            }
 	            xhr.open(obj.method, obj.url, obj.async);
@@ -946,4 +1003,4 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ ])
 });
 ;
-//# sourceMappingURL=smartview.js.map
+//# sourceMappingURL=moq.js.map
