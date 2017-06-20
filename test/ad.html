@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <meta http-equiv="Access-Control-Allow-Origin" content="http://shinetechcd1.f3322.net:999">
+    <title>Test Demo</title>
+</head>
+
+<body>
+
+    <a href="http://ox.go2ox.net/www/delivery/ck.php?oaparams=2__bannerid=34__zoneid=22__cb=e0157ae5b1__oadest=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.xgg.ml%26referrer%3Daf_tranid%253Dyv_MIv54J5raz3R3-QeLgg" target="_blank">
+        <img src="http://ox.go2ox.net/www/images/1bf736b4eebb2438933e5c6570792a9f.jpg" width="320" height="50" alt="" title="" border="0" style="touch-action: manipulation;"></a>
+
+    <script src="../dist/moq.js?impid=123&reqw=320&reqh=50&ep=smrtb.com&test=5" async></script>
+
+    <div>
+        clicked: <span id="clicked"></span>
+    </div>
+    <div>
+        isAdView: <span id="isview"></span>
+    </div>
+    <script>
+        window.onload = function() {
+            var elv = document.getElementById('isview');
+            var elc = document.getElementById('clicked');
+            var frame = window;
+            var lastState = '';
+            setInterval(function() {
+                if (typeof frame.isAdView !== 'undefined') {
+                    elv.innerText = frame.isAdView
+                } else {
+                    elv.innerText = "false";
+                }
+                if (typeof frame.clicked !== 'undefined') {
+                    elc.innerText = frame.clicked
+                } else {
+                    elc.innerText = "false";
+                }
+            }, 1000)
+        }
+    </script>
+</body>
+
+</html>
